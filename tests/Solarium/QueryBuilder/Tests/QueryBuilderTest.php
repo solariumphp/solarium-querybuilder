@@ -212,6 +212,36 @@ class QueryBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('cat:C', $filterQuery->getQuery());
     }
 
+    public function testQueryWithQuotedDateFilter()
+    {
+        $this->request->addParam('fq', 'startDate:"2016-01-01T00:00:00Z"');
+        $this->queryBuilder->build($this->query, $this->request);
+        $filterQueries = $this->query->getFilterQueries();
+
+        $this->assertCount(1, $filterQueries);
+        $filterQuery = current($filterQueries);
+        $this->assertEquals('startDate', $filterQuery->getKey());
+        $this->assertEquals('startDate:"2016-01-01T00:00:00Z"', $filterQuery->getQuery());
+    }
+
+    public function testQueryWithDateRangeFilters()
+    {
+        $this->request->addParam('fq', 'dateA:[2016-01-01T00:00:00Z TO 2016-01-02T00:00:00Z]');
+        $this->request->addParam('fq', 'dateB:["2016-01-01T00:00:00Z" TO "2016-01-02T00:00:00Z"]');
+        $this->queryBuilder->build($this->query, $this->request);
+        $filterQueries = $this->query->getFilterQueries();
+
+        $this->assertCount(2, $filterQueries);
+
+        $filterQuery = current($filterQueries);
+        $this->assertEquals('dateA', $filterQuery->getKey());
+        $this->assertEquals('dateA:[2016-01-01T00:00:00Z TO 2016-01-02T00:00:00Z]', $filterQuery->getQuery());
+
+        $filterQuery = next($filterQueries);
+        $this->assertEquals('dateB', $filterQuery->getKey());
+        $this->assertEquals('dateB:["2016-01-01T00:00:00Z" TO "2016-01-02T00:00:00Z"]', $filterQuery->getQuery());
+    }
+
     public function testQueryWithEmptyFilter()
     {
         $this->request->addParam('fq', '');

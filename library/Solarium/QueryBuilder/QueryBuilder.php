@@ -116,7 +116,9 @@ class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
             }
 
             if (!array_key_exists('key', $filterQueryParams)) {
-                preg_match_all('/\b([\w]+):/', $filterQueryParams['query'], $matches);
+                // Remove content inside quotes and brackets, as these can contain semicolons
+                $queryString = preg_replace('/[\"\[].*[\"\]]/u', '', $filterQueryParams['query']);
+                preg_match_all('/\b([\w]+):/', $queryString, $matches);
                 $key = implode('-', $matches[1]);
                 $filterQueryParams['key'] = $key;
 
