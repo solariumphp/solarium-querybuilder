@@ -53,6 +53,27 @@ use Solarium\QueryBuilder\Component\Grouping;
 class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
 {
     /**
+     * Define which params are allowed to be mapped
+     */
+    protected $paramWhitelist = ['d'];
+
+    /**
+     * @return array
+     */
+    public function getParamWhitelist()
+    {
+        return $this->paramWhitelist;
+    }
+
+    /**
+     * @param array $paramWhitelist
+     */
+    public function setParamWhitelist($paramWhitelist)
+    {
+        $this->paramWhitelist = $paramWhitelist;
+    }
+
+    /**
      * Build query object from a request.
      *
      * @param Query $query
@@ -74,6 +95,7 @@ class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
         $this->parseSortParam($query, $request);
         $this->parseFilterQueries($query, $request);
         $this->parseComponents($query, $request);
+        $this->parseSimpleParams($query, $request);
     }
 
     /**
@@ -151,6 +173,19 @@ class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
 
         foreach ($componentBuilders as $componentBuilder) {
             $componentBuilder->buildQuery($query, $request);
+        }
+    }
+
+    /**
+     * @param Query $query
+     * @param Request $request
+     */
+    protected function parseSimpleParams(Query $query, Request $request)
+    {
+        foreach ($request->getParams() as $key => $value) {
+            if (in_array($key, $this->paramWhitelist)) {
+                $query->addParam($key, $value);
+            }
         }
     }
 }

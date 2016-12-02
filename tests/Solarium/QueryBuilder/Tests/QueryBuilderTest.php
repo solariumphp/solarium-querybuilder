@@ -254,4 +254,14 @@ class QueryBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $this->markTestIncomplete('not yet implemented');
     }
+
+    public function testRemainingRequestParamsAreMapped()
+    {
+        $this->request->addParam('sort', 'price ASC');
+        $this->request->addParam('d', 50);
+        $this->request->addParam('foo', 'bar');
+        $this->queryBuilder->build($this->query, $this->request);
+        $this->assertCount(1, $this->query->getParams());
+        $this->assertEquals(['d' => 50], $this->query->getParams());
+    }
 }
